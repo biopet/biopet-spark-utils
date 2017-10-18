@@ -5,6 +5,10 @@ scalaVersion := "2.11.11"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
+dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core" % "2.8.7"
+dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.7"
+dependencyOverrides += "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.7"
+
 libraryDependencies += "com.github.biopet" %% "biopet-ngs-utils" % "0.1-SNAPSHOT" changing()
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.0"
 
