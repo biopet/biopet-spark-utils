@@ -19,7 +19,7 @@ package object spark {
         .setExecutorEnv(sys.env.toArray)
         .setAppName(name)
         .setMaster(
-          master.getOrElse(s"local[${localThreads}]"))
+          master.getOrElse(s"local[$localThreads]"))
         .setJars(jars))((a, b) => a.set(b._1, b._2))
     new SparkContext(conf)
   }

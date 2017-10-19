@@ -13,7 +13,7 @@ package object vcf {
                   regions: Seq[BedRecord],
                   repartition: Boolean = true,
                   cached: Boolean = true)(implicit sc: SparkContext): RDD[VariantContext] = {
-    val rdd = sc.parallelize(regions, regions.size).flatMap(ngs.vcf.loadRegion(inputFile, _))
+    val rdd = sc.parallelize(regions, regions.size).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
     if (repartition && cached) rdd.repartition(regions.size).cache()
     else if (repartition) rdd.repartition(regions.size)
     else if (cached) rdd.cache()
