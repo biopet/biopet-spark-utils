@@ -11,11 +11,11 @@ import org.apache.spark.rdd.RDD
 package object vcf {
   def loadRecords(inputFile: File,
                   regions: Seq[BedRecord],
-                  repartition: Boolean = true,
+                  sorting: Boolean = true,
                   cached: Boolean = true)(implicit sc: SparkContext): RDD[VariantContext] = {
     val rdd = sc.parallelize(regions, regions.size).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
-    if (repartition && cached) rdd.repartition(regions.size).cache()
-    else if (repartition) rdd.repartition(regions.size)
+    if (sorting && cached) rdd.sortBy(x => (x.getContig, x.getStart)).cache()
+    else if (sorting) rdd.repartition(regions.size)
     else if (cached) rdd.cache()
     else rdd
   }
