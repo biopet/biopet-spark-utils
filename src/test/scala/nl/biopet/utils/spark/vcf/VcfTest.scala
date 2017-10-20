@@ -1,5 +1,6 @@
 package nl.biopet.utils.spark.vcf
 
+import htsjdk.variant.vcf.VCFFileReader
 import nl.biopet.test.BiopetTest
 import nl.biopet.utils.ngs.intervals.BedRecord
 import org.apache.spark.SparkContext
@@ -19,4 +20,23 @@ class VcfTest extends BiopetTest {
       sc.stop()
     }
   }
+
+  @Test
+  def testSampleCompare(): Unit = {
+    val inputVcf = resourceFile("/chrQ.vcf.gz")
+    val vcfReader = new VCFFileReader(inputVcf, false)
+    implicit val sc: SparkContext = spark.loadSparkContext("test")
+
+    try {
+      val header = sc.broadcast(vcfReader.getFileHeader)
+      val records = loadRecords(inputVcf, List(BedRecord("chrQ", 1, 16000)))
+      val compare = sampleCompare(records, header).collectAsMap()("chrQ")
+      compare.samples.size shouldBe 3
+      compare.genotypesCount(0)(0) shouldBe 1
+    } finally {
+      sc.stop()
+      vcfReader.close()
+    }
+  }
+
 }
