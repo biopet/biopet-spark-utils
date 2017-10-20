@@ -6,7 +6,7 @@ import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFHeader
 import nl.biopet.utils.ngs
 import nl.biopet.utils.ngs.intervals.BedRecord
-import nl.biopet.utils.ngs.vcf.SampleCompare
+import nl.biopet.utils.ngs.vcf.{GeneralStats, GenotypeStats, SampleCompare}
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -44,6 +44,44 @@ package object vcf {
         contigCompare(record.getContig).addRecord(record, sampleToSampleMinDepth)
       }
       contigCompare.iterator
+    }.reduceByKey(_ += _)
+  }
+
+  /**
+    * This method will create a [[GeneralStats]] class for each contig
+    *
+    * @param vcfRecords Rdd for the vcf records, sorted RDD works best
+    * @return
+    */
+  def generalStats(vcfRecords: RDD[VariantContext]): RDD[(String, GeneralStats)] = {
+    vcfRecords.mapPartitions { it =>
+      val contigStats: mutable.Map[String, GeneralStats] = mutable.Map()
+      it.foreach { record =>
+        if (!contigStats.contains(record.getContig))
+          contigStats += record.getContig -> new GeneralStats
+        contigStats(record.getContig).addRecord(record)
+      }
+      contigStats.iterator
+    }.reduceByKey(_ += _)
+  }
+
+  /**
+    * This method will create a [[GeneralStats]] class for each contig
+    *
+    * @param vcfRecords Rdd for the vcf records, sorted RDD works best
+    * @param header Header of the vcf file
+    * @return
+    */
+  def genotypeStats(vcfRecords: RDD[VariantContext],
+                    header: Broadcast[VCFHeader]): RDD[(String, GenotypeStats)] = {
+    vcfRecords.mapPartitions { it =>
+      val contigStats: mutable.Map[String, GenotypeStats] = mutable.Map()
+      it.foreach { record =>
+        if (!contigStats.contains(record.getContig))
+          contigStats += record.getContig -> new GenotypeStats(header.value)
+        contigStats(record.getContig).addRecord(record)
+      }
+      contigStats.iterator
     }.reduceByKey(_ += _)
   }
 }
