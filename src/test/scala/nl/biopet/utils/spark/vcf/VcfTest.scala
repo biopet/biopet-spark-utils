@@ -15,7 +15,7 @@ class VcfTest extends BiopetTest {
 
     try {
       val rdd = loadRecords(inputVcf, List(BedRecord("chrQ", 1000, 1100)))
-      rdd.count() shouldBe 1L
+      rdd.count() shouldBe 2L
     } finally {
       sc.stop()
     }
@@ -32,7 +32,7 @@ class VcfTest extends BiopetTest {
       val records = loadRecords(inputVcf, List(BedRecord("chrQ", 1, 16000)))
       val compare = sampleCompare(records, header).collectAsMap()("chrQ")
       compare.samples.size shouldBe 3
-      compare.genotypesCount(0)(0) shouldBe 1
+      compare.genotypesCount(0)(0) shouldBe 2
     } finally {
       sc.stop()
       vcfReader.close()
