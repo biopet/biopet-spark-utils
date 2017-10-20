@@ -22,7 +22,7 @@ class VcfTest extends BiopetTest {
     implicit val sc: SparkContext = spark.loadSparkContext("test")
 
     try {
-      val rdd = loadRecords(inputVcf, List(BedRecord("chrQ", 1000, 1100)))
+      val rdd = loadRecords(inputVcf, List(BedRecord("chrQ", 1000, 1100)), cached = cache, sorting = sorted)
       rdd.count() shouldBe 2L
     } finally {
       sc.stop()
