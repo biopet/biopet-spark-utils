@@ -66,7 +66,7 @@ package object vcf {
   }
 
   /**
-    * This method will create a [[GeneralStats]] class for each contig
+    * This method will create a [[GenotypeStats]] class for each contig
     *
     * @param vcfRecords Rdd for the vcf records, sorted RDD works best
     * @param header Header of the vcf file
