@@ -15,12 +15,12 @@ import scala.collection.mutable
 
 package object vcf {
   def loadRecords(inputFile: File,
-                  regions: Seq[BedRecord],
+                  regions: Broadcast[List[BedRecord]],
                   sorting: Boolean = true,
                   cached: Boolean = true)(implicit sc: SparkContext): RDD[VariantContext] = {
-    val rdd = sc.parallelize(regions, regions.size).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
+    val rdd = sc.parallelize(regions.value, regions.value.size).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
     if (sorting && cached) rdd.sortBy(x => (x.getContig, x.getStart)).cache()
-    else if (sorting) rdd.repartition(regions.size)
+    else if (sorting) rdd.repartition(regions.value.size)
     else if (cached) rdd.cache()
     else rdd
   }

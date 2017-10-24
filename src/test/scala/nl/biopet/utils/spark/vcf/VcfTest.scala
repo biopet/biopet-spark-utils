@@ -23,7 +23,7 @@ class VcfTest extends BiopetTest {
     implicit val sc: SparkContext = spark.loadSparkContext("test")
 
     try {
-      val rdd = loadRecords(inputVcf, List(BedRecord("chrQ", 1000, 1100)), cached = cache, sorting = sorted)
+      val rdd = loadRecords(inputVcf, sc.broadcast(List(BedRecord("chrQ", 1000, 1100))), cached = cache, sorting = sorted)
       rdd.count() shouldBe 2L
     } finally {
       sc.stop()
@@ -38,7 +38,7 @@ class VcfTest extends BiopetTest {
 
     try {
       val header = sc.broadcast(vcfReader.getFileHeader)
-      val records = loadRecords(inputVcf, List(BedRecord("chrQ", 1, 16000)))
+      val records = loadRecords(inputVcf, sc.broadcast(List(BedRecord("chrQ", 1, 16000))))
       val compare = sampleCompare(records, header).collectAsMap()("chrQ")
       compare.samples.size shouldBe 3
       compare.genotypesCount(0)(0) shouldBe 2
@@ -54,7 +54,7 @@ class VcfTest extends BiopetTest {
     implicit val sc: SparkContext = spark.loadSparkContext("test")
 
     try {
-      val records = loadRecords(inputVcf, List(BedRecord("chrQ", 1, 16000)))
+      val records = loadRecords(inputVcf, sc.broadcast(List(BedRecord("chrQ", 1, 16000))))
       val stats = generalStats(records).collectAsMap()("chrQ")
       stats.toMap(GeneralStats.values.find(_.toString == "Total").get) shouldBe 2L
     } finally {
@@ -70,7 +70,7 @@ class VcfTest extends BiopetTest {
 
     try {
       val header = sc.broadcast(vcfReader.getFileHeader)
-      val records = loadRecords(inputVcf, List(BedRecord("chrQ", 1, 16000)))
+      val records = loadRecords(inputVcf, sc.broadcast(List(BedRecord("chrQ", 1, 16000))))
       val stats = genotypeStats(records, header).collectAsMap()("chrQ")
       stats.samples.size shouldBe 3
       stats.toMap("Sample_101")(GenotypeStats.values.find(_.toString == "Total").get) shouldBe 2L
