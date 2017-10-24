@@ -35,6 +35,7 @@ package object vcf {
     */
   def sampleCompare(vcfRecords: RDD[VariantContext],
                     header: Broadcast[VCFHeader],
+                    regions: Broadcast[List[BedRecord]],
                     sampleToSampleMinDepth: Option[Int] = None): RDD[(String, SampleCompare)] = {
     vcfRecords.mapPartitions { it =>
       val contigCompare: mutable.Map[String, SampleCompare] = mutable.Map()
@@ -44,7 +45,9 @@ package object vcf {
         contigCompare(record.getContig).addRecord(record, sampleToSampleMinDepth)
       }
       contigCompare.iterator
-    }.reduceByKey(_ += _)
+    }
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new SampleCompare(header.value))))
+      .reduceByKey(_ += _)
   }
 
   /**
@@ -53,7 +56,8 @@ package object vcf {
     * @param vcfRecords Rdd for the vcf records, sorted RDD works best
     * @return
     */
-  def generalStats(vcfRecords: RDD[VariantContext]): RDD[(String, GeneralStats)] = {
+  def generalStats(vcfRecords: RDD[VariantContext],
+                   regions: Broadcast[List[BedRecord]]): RDD[(String, GeneralStats)] = {
     vcfRecords.mapPartitions { it =>
       val contigStats: mutable.Map[String, GeneralStats] = mutable.Map()
       it.foreach { record =>
@@ -62,7 +66,9 @@ package object vcf {
         contigStats(record.getContig).addRecord(record)
       }
       contigStats.iterator
-    }.reduceByKey(_ += _)
+    }
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new GeneralStats())))
+      .reduceByKey(_ += _)
   }
 
   /**
@@ -73,7 +79,8 @@ package object vcf {
     * @return
     */
   def genotypeStats(vcfRecords: RDD[VariantContext],
-                    header: Broadcast[VCFHeader]): RDD[(String, GenotypeStats)] = {
+                    header: Broadcast[VCFHeader],
+                    regions: Broadcast[List[BedRecord]]): RDD[(String, GenotypeStats)] = {
     vcfRecords.mapPartitions { it =>
       val contigStats: mutable.Map[String, GenotypeStats] = mutable.Map()
       it.foreach { record =>
@@ -82,6 +89,8 @@ package object vcf {
         contigStats(record.getContig).addRecord(record)
       }
       contigStats.iterator
-    }.reduceByKey(_ += _)
+    }
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new GenotypeStats(header.value))))
+      .reduceByKey(_ += _)
   }
 }
