@@ -65,6 +65,21 @@ class VcfTest extends BiopetTest {
   }
 
   @Test
+  def testSampleDistributions(): Unit = {
+    val inputVcf = resourceFile("/chrQ.vcf.gz")
+    implicit val sc: SparkContext = spark.loadSparkContext("test")
+
+    try {
+      val regions = sc.broadcast(List(BedRecord("chrQ", 1, 16000)))
+      val records = loadRecords(inputVcf, regions)
+      val stats = sampleDistributions(records, regions).collectAsMap()("chrQ")
+      stats.toMap(GenotypeStats.values.find(_.toString == "Total").get) shouldBe Map(3 -> 2L)
+    } finally {
+      sc.stop()
+    }
+  }
+
+  @Test
   def testGenotypeStats(): Unit = {
     val inputVcf = resourceFile("/chrQ.vcf.gz")
     val vcfReader = new VCFFileReader(inputVcf, false)
