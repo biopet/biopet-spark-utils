@@ -6,7 +6,7 @@ import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFHeader
 import nl.biopet.utils.ngs
 import nl.biopet.utils.ngs.intervals.BedRecord
-import nl.biopet.utils.ngs.vcf.{GeneralStats, GenotypeStats, SampleCompare}
+import nl.biopet.utils.ngs.vcf.{GeneralStats, GenotypeStats, SampleCompare, SampleDistributions}
 import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
@@ -68,6 +68,27 @@ package object vcf {
       contigStats.iterator
     }
       .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new GeneralStats())))
+      .reduceByKey(_ += _)
+  }
+
+  /**
+    * This method will create a [[GeneralStats]] class for each contig
+    *
+    * @param vcfRecords Rdd for the vcf records, sorted RDD works best
+    * @return
+    */
+  def sampleDistributions(vcfRecords: RDD[VariantContext],
+                   regions: Broadcast[List[BedRecord]]): RDD[(String, SampleDistributions)] = {
+    vcfRecords.mapPartitions { it =>
+      val contigStats: mutable.Map[String, SampleDistributions] = mutable.Map()
+      it.foreach { record =>
+        if (!contigStats.contains(record.getContig))
+          contigStats += record.getContig -> new SampleDistributions
+        contigStats(record.getContig).addRecord(record)
+      }
+      contigStats.iterator
+    }
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new SampleDistributions())))
       .reduceByKey(_ += _)
   }
 
