@@ -46,7 +46,7 @@ package object vcf {
       }
       contigCompare.iterator
     }
-      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new SampleCompare(header.value))))
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct).map(_ -> new SampleCompare(header.value)))
       .reduceByKey(_ += _)
   }
 
@@ -67,7 +67,7 @@ package object vcf {
       }
       contigStats.iterator
     }
-      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new GeneralStats())))
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct).map(_ -> new GeneralStats()))
       .reduceByKey(_ += _)
   }
 
@@ -88,7 +88,7 @@ package object vcf {
       }
       contigStats.iterator
     }
-      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new SampleDistributions())))
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct).map(_ -> new SampleDistributions()))
       .reduceByKey(_ += _)
   }
 
@@ -111,7 +111,7 @@ package object vcf {
       }
       contigStats.iterator
     }
-      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct.map(_ -> new GenotypeStats(header.value))))
+      .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr).distinct).map(_ -> new GenotypeStats(header.value)))
       .reduceByKey(_ += _)
   }
 
@@ -136,8 +136,8 @@ package object vcf {
       contigStats.iterator
     }
       .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr)
-        .distinct
-        .map(_ -> vcfField.value.newInfoCount(header.value))))
+        .distinct)
+        .map(_ -> vcfField.value.newInfoCount(header.value)))
       .reduceByKey(_ += _)
   }
 
@@ -162,8 +162,8 @@ package object vcf {
       contigStats.iterator
     }
       .union(vcfRecords.sparkContext.parallelize(regions.value.map(_.chr)
-        .distinct
-        .map(_ -> vcfField.value.newGenotypeCount(header.value))))
+        .distinct)
+        .map(_ -> vcfField.value.newGenotypeCount(header.value)))
       .reduceByKey(_ += _)
   }
 }
