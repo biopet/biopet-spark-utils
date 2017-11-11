@@ -20,7 +20,7 @@ package object vcf {
                   cached: Boolean = true)(implicit sc: SparkContext): RDD[VariantContext] = {
     val rdd = sc.parallelize(regions.value, regions.value.size).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
     if (sorting && cached) rdd.sortBy(x => (x.getContig, x.getStart)).cache()
-    else if (sorting) rdd.repartition(regions.value.size)
+    else if (sorting) rdd.sortBy(x => (x.getContig, x.getStart))
     else if (cached) rdd.cache()
     else rdd
   }
