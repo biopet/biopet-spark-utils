@@ -18,7 +18,8 @@ package object vcf {
                   regions: Broadcast[List[BedRecord]],
                   sorting: Boolean = true,
                   cached: Boolean = true)(implicit sc: SparkContext): RDD[VariantContext] = {
-    val rdd = sc.parallelize(regions.value, regions.value.size).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
+    val partitions = if (regions.value.isEmpty) 1 else regions.value.size
+    val rdd = sc.parallelize(regions.value, partitions).mapPartitions(ngs.vcf.loadRegions(inputFile, _))
     if (sorting && cached) rdd.sortBy(x => (x.getContig, x.getStart)).cache()
     else if (sorting) rdd.sortBy(x => (x.getContig, x.getStart))
     else if (cached) rdd.cache()
