@@ -4,8 +4,6 @@ import java.net.URLClassLoader
 
 import org.apache.spark.{SparkConf, SparkContext}
 
-import org.apache.spark.sql.SparkSession
-
 package object spark {
 
   private def getConf(name: String,
@@ -34,16 +32,5 @@ package object spark {
                        localThreads: Int = 1): SparkContext = {
     val conf = getConf(name, master, sparkConfig, localThreads)
     new SparkContext(conf)
-  }
-
-  def loadSparkSession(name: String,
-                       master: Option[String] = None,
-                       sparkConfig: Map[String, String] = Map(),
-                       localThreads: Int = 1): SparkSession = {
-    val conf = getConf(name, master, sparkConfig, localThreads)
-    SparkSession
-      .builder()
-      .config(conf)
-      .getOrCreate()
   }
 }
