@@ -3,7 +3,7 @@ package nl.biopet.utils.spark.vcf
 import htsjdk.variant.vcf.VCFFileReader
 import nl.biopet.test.BiopetTest
 import nl.biopet.utils.ngs.intervals.BedRecord
-import nl.biopet.utils.ngs.vcf.{GeneralStats, GenotypeStats}
+import nl.biopet.utils.ngs.vcf.{FieldMethod, GeneralStats, GenotypeStats, VcfField}
 import org.apache.spark.SparkContext
 import org.testng.annotations.{DataProvider, Test}
 import nl.biopet.utils.spark
@@ -92,6 +92,45 @@ class VcfTest extends BiopetTest {
       val stats = genotypeStats(records, header, regions).collectAsMap()("chrQ")
       stats.samples.size shouldBe 3
       stats.toMap("Sample_101")(GenotypeStats.values.find(_.toString == "Total").get) shouldBe 2L
+    } finally {
+      sc.stop()
+      vcfReader.close()
+    }
+  }
+
+  @Test
+  def testInfoFieldCounts(): Unit = {
+    val inputVcf = resourceFile("/chrQ.vcf.gz")
+    val vcfReader = new VCFFileReader(inputVcf, false)
+    implicit val sc: SparkContext = spark.loadSparkContext("test")
+
+    try {
+      val regions = sc.broadcast(List(BedRecord("chrQ", 1, 16000)))
+      val header = sc.broadcast(vcfReader.getFileHeader)
+      val records = loadRecords(inputVcf, regions)
+      val vcfField = sc.broadcast(VcfField("DP", FieldMethod.All))
+      val counts = infoFieldCounts(records, header, vcfField, regions).collectAsMap()("chrQ")
+      counts.countsMap shouldBe Map("124" -> 2)
+    } finally {
+      sc.stop()
+      vcfReader.close()
+    }
+  }
+
+  @Test
+  def testGenotypeFieldCounts(): Unit = {
+    val inputVcf = resourceFile("/chrQ.vcf.gz")
+    val vcfReader = new VCFFileReader(inputVcf, false)
+    implicit val sc: SparkContext = spark.loadSparkContext("test")
+
+    try {
+      val regions = sc.broadcast(List(BedRecord("chrQ", 1, 16000)))
+      val header = sc.broadcast(vcfReader.getFileHeader)
+      val records = loadRecords(inputVcf, regions)
+      val vcfField = sc.broadcast(VcfField("DP", FieldMethod.All))
+      val counts = genotypeFieldCounts(records, header, vcfField, regions).collectAsMap()("chrQ")
+      counts.samples.size shouldBe 3
+      counts.countsMap("Sample_101") shouldBe Map("45" -> 2)
     } finally {
       sc.stop()
       vcfReader.close()
