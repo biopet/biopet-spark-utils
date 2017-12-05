@@ -24,10 +24,15 @@ import scala.collection.mutable
 package object vcf {
   def loadRecords(inputFile: File,
                   regions: Broadcast[List[BedRecord]],
+                  binSize: Int,
                   sorting: Boolean = true,
                   cached: Boolean = true)(
       implicit sc: SparkContext): RDD[VariantContext] = {
-    val partitions = if (regions.value.isEmpty) 1 else regions.value.size
+    val partitions =
+      if (regions.value.isEmpty) 1
+      else {
+        regions.value.map(_.length).sum / binSize + 1
+      }
     val rdd = sc
       .parallelize(regions.value, partitions)
       .mapPartitions(ngs.vcf.loadRegions(inputFile, _))
