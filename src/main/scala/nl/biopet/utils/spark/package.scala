@@ -6,10 +6,10 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 package object spark {
 
-  private def getConf(name: String,
+  def getConf(name: String,
                       master: Option[String] = None,
                       sparkConfig: Map[String, String] = Map(),
-                      localThreads: Int = 1) = {
+                      localThreads: Int = 1): SparkConf = {
 
     val jars = ClassLoader.getSystemClassLoader
       .asInstanceOf[URLClassLoader]
