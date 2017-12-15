@@ -7,9 +7,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 package object spark {
 
   def getConf(name: String,
-                      master: Option[String] = None,
-                      sparkConfig: Map[String, String] = Map(),
-                      localThreads: Int = 1): SparkConf = {
+              master: Option[String] = None,
+              sparkConfig: Map[String, String] = Map(),
+              localThreads: Int = 1): SparkConf = {
 
     val jars = ClassLoader.getSystemClassLoader
       .asInstanceOf[URLClassLoader]
