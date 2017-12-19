@@ -11,9 +11,7 @@ scmInfo := Some(
   )
 )
 
-developers := List(
-  Developer(id="ffinfo", name="Peter van 't Hof", email="pjrvanthof@gmail.com", url=url("https://github.com/ffinfo"))
-)
+developers += Developer(id="ffinfo", name="Peter van 't Hof", email="pjrvanthof@gmail.com", url=url("https://github.com/ffinfo"))
 
 publishMavenStyle := true
 
@@ -27,8 +25,8 @@ dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.
 dependencyOverrides += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.7"
 
 libraryDependencies += "com.github.biopet" %% "ngs-utils" % "0.2"
-libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.0"
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.0"
+libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.1" % Provided
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.1" % Provided
 
 libraryDependencies += "com.github.biopet" %% "test-utils" % "0.2" % Test
 
