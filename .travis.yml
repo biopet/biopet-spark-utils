@@ -2,7 +2,7 @@ language: scala
 scala:
   - 2.11.11
 script:
-  - sbt clean evicted scalafmt coverage test coverageReport coverageAggregate coveralls
+  - sbt clean evicted scalafmt coverage test coverageReport coverageAggregate coveralls | tee sbt.log
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - |
