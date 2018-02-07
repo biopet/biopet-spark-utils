@@ -1,5 +1,5 @@
 organization := "com.github.biopet"
-name := "SparkUtils"
+name := "spark-utils"
 
 biopetUrlName := "spark-utils"
 
@@ -13,8 +13,8 @@ dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core" % "2.8.7"
 dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.7"
 dependencyOverrides += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.7"
 
-libraryDependencies += "com.github.biopet" %% "ngs-utils" % "0.3-SNAPSHOT"
+libraryDependencies += "com.github.biopet" %% "ngs-utils" % "0.3-SNAPSHOT" changing()
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.1" % Provided
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.1" % Provided
 
-libraryDependencies += "com.github.biopet" %% "test-utils" % "0.2" % Test
+libraryDependencies += "com.github.biopet" %% "test-utils" % "0.3-SNAPSHOT" % Test changing()
