@@ -60,8 +60,7 @@ package object vcf {
         val contigCompare: mutable.Map[String, SampleCompare] = mutable.Map()
         it.foreach { record =>
           if (!contigCompare.contains(record.getContig))
-            contigCompare += record.getContig -> new SampleCompare(
-              header.value)
+            contigCompare += record.getContig -> new SampleCompare(header.value)
           contigCompare(record.getContig).addRecord(record,
                                                     sampleToSampleMinDepth)
         }
