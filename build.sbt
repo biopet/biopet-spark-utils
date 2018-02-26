@@ -23,4 +23,4 @@ libraryDependencies += "com.github.biopet" %% "ngs-utils" % "0.3-SNAPSHOT" chang
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.2.1" % Provided
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.2.1" % Provided
 
-libraryDependencies += "com.github.biopet" %% "test-utils" % "0.3-SNAPSHOT" % Test changing ()
+libraryDependencies += "com.github.biopet" %% "test-utils" % "0.3"
