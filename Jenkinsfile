@@ -24,7 +24,11 @@ pipeline {
             steps {
                 sh "#!/bin/bash\n" +
                         "set -e -v -o pipefail\n" +
-                        "${sbt} clean evicted biopetTest | tee sbt.log"
+                        "${sbt} clean biopetTest | tee sbt.log"
+                junit 'target/test-reports/*.xml'
+                sh "#!/bin/bash\n" +
+                        "set -e -v -o pipefail\n" +
+                        "${sbt} 'set biopetEnableCodacyCoverage := false' evicted biopetTestReport | tee sbt.log"
                 sh 'n=`grep -ce "\\* com.github.biopet" sbt.log || true`; if [ "$n" -ne \"0\" ]; then echo "ERROR: Found conflicting dependencies inside biopet"; exit 1; fi'
                 sh "git diff --exit-code || (echo \"ERROR: Git changes detected, please regenerate the readme, create license headers and run scalafmt: sbt biopetGenerateReadme headerCreate scalafmt\" && exit 1)"
                 step([$class: 'ScoveragePublisher', reportDir: 'target/scala-2.11/scoverage-report/', reportFile: 'scoverage.xml'])
@@ -42,7 +46,8 @@ pipeline {
     }
     post {
         always {
-            junit '**/test-output/junitreports/*.xml'
+            sh "touch target/test-reports/*.xml"
+            junit 'target/test-reports/*.xml'
         }
         failure {
             slackSend(color: '#FF0000', message: "Failure: Job '${env.JOB_NAME} #${env.BUILD_NUMBER}' (<${env.BUILD_URL}|Open>)", channel: '#biopet-bot', teamDomain: 'lumc', tokenCredentialId: 'lumc')
